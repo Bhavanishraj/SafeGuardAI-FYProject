@@ -113,6 +113,9 @@ class MainActivity : AppCompatActivity() {
         cbShakeDetect.setOnCheckedChangeListener { _, checked ->
             if (checked) registerShakeListener() else unregisterShakeListener()
         }
+
+        // OPTIONAL: ask user to enable accessibility (if you have KeyCaptureService)
+        // openAccessibilitySettings(this)
     }
 
     // =========================
@@ -220,7 +223,6 @@ class MainActivity : AppCompatActivity() {
 
             val now = SystemClock.elapsedRealtime()
 
-            // tweak 11f–13f; higher = harder shake required
             val isStrongShake = kotlin.math.abs(accelMagnitude) > 12f
 
             // 1.5s window to count shakes
@@ -284,7 +286,7 @@ class MainActivity : AppCompatActivity() {
     private fun toast(msg: String) =
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 
-    // Respect lifecycle
+    // Lifecycle respect
     override fun onResume() {
         super.onResume()
         if (::cbShakeDetect.isInitialized && cbShakeDetect.isChecked) registerShakeListener()
@@ -293,5 +295,14 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         unregisterShakeListener()
+    }
+
+    // =========================
+    // Accessibility helper
+    // =========================
+    private fun openAccessibilitySettings(context: Context) {
+        val intent = Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 }

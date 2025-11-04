@@ -1,3 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SafeGuardAI</string>
+
+    <!-- Accessibility service description -->
+    <string name="accessibility_desc">
+        Enables SafeGuard AI to listen for hardware key presses (e.g., volume buttons)
+        to trigger a fake call or SOS alert in emergencies.
+    </string>
 </resources>
