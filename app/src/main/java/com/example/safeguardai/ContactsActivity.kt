@@ -1,5 +1,7 @@
 package com.example.safeguardai
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
 import android.widget.EditText
@@ -23,17 +25,29 @@ class ContactsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // ✅ Use your exact layout name here
         setContentView(R.layout.activitiescontact)
         supportActionBar?.title = "Emergency Contacts"
 
         val rv = findViewById<RecyclerView>(R.id.rvContacts)
         rv.layoutManager = LinearLayoutManager(this)
-        adapter = ContactsAdapter(mutableListOf()) { /* swipe handles delete */ }
+
+        // Adapter now has onItemClick: return selected contact to MainActivity
+        adapter = ContactsAdapter(
+            mutableListOf(),
+            onItemClick = { contact ->
+                val data = Intent().apply {
+                    putExtra("selected_phone", contact.phone)
+                    putExtra("selected_name", contact.name)
+                }
+                setResult(Activity.RESULT_OK, data)
+                finish()
+            }
+        )
         rv.adapter = adapter
 
-        // ✅ Swipe to delete contacts
-        val swipe = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+        // Swipe to delete
+        val swipe = object :
+            ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
             override fun onMove(
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder,
@@ -47,11 +61,11 @@ class ContactsActivity : AppCompatActivity() {
         }
         ItemTouchHelper(swipe).attachToRecyclerView(rv)
 
-        // ✅ Add new contact button
+        // FAB add
         findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabAdd)
             .setOnClickListener { showAddDialog() }
 
-        // ✅ Observe database changes in real-time
+        // Observe DB changes
         lifecycleScope.launch {
             dao.getAll().collectLatest { contacts -> adapter.submit(contacts) }
         }
@@ -64,7 +78,6 @@ class ContactsActivity : AppCompatActivity() {
             inputType = InputType.TYPE_CLASS_PHONE
         }
 
-        // ✅ Container for input fields
         val container = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             val pad = dp(16)
@@ -73,7 +86,6 @@ class ContactsActivity : AppCompatActivity() {
             addView(phoneInput)
         }
 
-        // ✅ Build and show the dialog
         AlertDialog.Builder(this)
             .setTitle("Add Emergency Contact")
             .setView(container)
